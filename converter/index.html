@@ -335,25 +335,22 @@
         }
     }
 
-    // ФИНАЛЬНАЯ ФУНКЦИЯ СОХРАНЕНИЯ — БЕЗ ОТОБРАЖЕНИЯ КОДОВ
+    // ОБЫЧНОЕ СКАЧИВАНИЕ ЧЕРЕЗ БРАУЗЕР (БЕЗ МОСТА)
     function saveFile() {
-    if (!currentBlob || !currentFileName) {
-        showMessage('❌ Нет файла для сохранения', true);
-        return;
+        if (!currentBlob || !currentFileName) {
+            showMessage('❌ Нет файла для сохранения', true);
+            return;
+        }
+        const url = URL.createObjectURL(currentBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = currentFileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showMessage('📥 Файл скачивается');
     }
-    
-    // Обычное скачивание через браузер (работает везде)
-    const url = URL.createObjectURL(currentBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = currentFileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    showMessage('📥 Файл скачивается');
-}
 
     convertBtn.addEventListener('click', convertFile);
     downloadLink.addEventListener('click', saveFile);
