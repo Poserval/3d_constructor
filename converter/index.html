@@ -30,7 +30,6 @@
             padding: 2rem 1.5rem;
             box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.2s;
         }
 
         .logo {
@@ -39,18 +38,8 @@
         }
 
         .logo img {
-            max-width: 180px;
+            max-width: 280px;
             width: 100%;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            text-align: center;
-            background: linear-gradient(135deg, #fff, #c0b9ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 0.5rem;
         }
 
         .sub {
@@ -61,7 +50,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* БЛОК ЗАГРУЗКИ */
         .dropzone {
             background: rgba(255, 255, 255, 0.05);
             border: 2px dashed rgba(255, 255, 255, 0.4);
@@ -96,7 +84,6 @@
             margin-top: 6px;
         }
 
-        /* ИНФО О ФАЙЛЕ */
         .file-card {
             background: rgba(0, 0, 0, 0.45);
             border-radius: 1.25rem;
@@ -119,7 +106,6 @@
             margin-top: 4px;
         }
 
-        /* ФОРМАТЫ */
         .format-label {
             color: white;
             font-weight: 600;
@@ -162,7 +148,6 @@
             font-weight: bold;
         }
 
-        /* КНОПКИ */
         .btn {
             width: 100%;
             padding: 0.9rem;
@@ -273,10 +258,8 @@
     <div class="logo">
         <img src="assets/logo_converter.png" alt="3D Constructor">
     </div>
-    <h1>3D Constructor</h1>
     <div class="sub">Конвертер STL → OBJ / GLB / GLTF</div>
 
-    <!-- Зона выбора файла -->
     <div class="dropzone" id="dropzone">
         <span class="icon">📁</span>
         <div class="title">Выберите STL файл</div>
@@ -284,13 +267,11 @@
         <input type="file" id="fileInput" accept=".stl,.STL" style="display: none;">
     </div>
 
-    <!-- Информация о файле -->
     <div id="fileInfo" class="file-card">
         <div class="file-name" id="fileName">—</div>
         <div class="file-meta" id="fileMeta">—</div>
     </div>
 
-    <!-- Форматы -->
     <div class="format-label">Формат конвертации</div>
     <div class="format-row">
         <div class="format-box">
@@ -308,16 +289,13 @@
         </div>
     </div>
 
-    <!-- Кнопка конвертации -->
     <button id="convertBtn" class="btn btn-primary">🔄 Конвертировать</button>
 
-    <!-- Прогресс -->
     <div id="progressArea" class="progress-area">
         <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
         <div class="progress-text" id="progressText">0%</div>
     </div>
 
-    <!-- Результат -->
     <div id="resultArea" class="result-area">
         <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
             <span>📦 Размер:</span>
@@ -336,13 +314,11 @@
 <div id="toastMsg" class="toast"></div>
 
 <script>
-    // ========== DOM элементы ==========
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileInput');
     const fileInfoDiv = document.getElementById('fileInfo');
     const fileNameSpan = document.getElementById('fileName');
     const fileMetaSpan = document.getElementById('fileMeta');
-    const fromFormatSelect = document.getElementById('fromFormat');
     const toFormatSelect = document.getElementById('toFormat');
     const convertBtn = document.getElementById('convertBtn');
     const progressArea = document.getElementById('progressArea');
@@ -354,14 +330,12 @@
     const downloadLink = document.getElementById('downloadLink');
     const toastEl = document.getElementById('toastMsg');
 
-    // Сервер для конвертации (ваш API на Render)
     const API_URL = 'https://threed-converter-api.onrender.com/convert';
 
     let selectedFile = null;
     let currentBlob = null;
     let currentFileName = '';
 
-    // Уведомления
     function showMessage(msg, isError = false) {
         toastEl.textContent = msg;
         toastEl.style.background = isError ? '#b91c1ccc' : '#0f172acc';
@@ -369,7 +343,6 @@
         setTimeout(() => toastEl.classList.remove('show'), 2800);
     }
 
-    // Формат байтов
     function formatSize(bytes) {
         if (!bytes) return '0 B';
         if (bytes < 1024) return bytes + ' B';
@@ -377,7 +350,6 @@
         return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
     }
 
-    // Сброс UI
     function resetUI() {
         resultArea.style.display = 'none';
         downloadLink.style.display = 'none';
@@ -385,25 +357,20 @@
         convertBtn.disabled = false;
     }
 
-    // Обновление прогресса
     function updateProgress(percent, text) {
         progressFill.style.width = percent + '%';
         progressText.textContent = text || (percent + '%');
     }
 
-    // Отображение информации о выбранном файле
     function showFileInfo(file) {
         const ext = file.name.split('.').pop().toLowerCase();
         const sizeStr = formatSize(file.size);
         fileNameSpan.textContent = file.name;
         fileMetaSpan.textContent = `${ext.toUpperCase()} · ${sizeStr}`;
         fileInfoDiv.style.display = 'block';
-        // Блокируем fromFormat (только STL)
-        fromFormatSelect.value = 'stl';
         selectedFile = file;
     }
 
-    // Обработка выбора файла
     function onFileSelected(file) {
         if (!file) return;
         const ext = file.name.split('.').pop().toLowerCase();
@@ -419,13 +386,11 @@
         showFileInfo(file);
     }
 
-    // Клик по дропзоне
     dropzone.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length) onFileSelected(e.target.files[0]);
     });
 
-    // Drag & drop
     dropzone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropzone.style.borderColor = '#a07eff';
@@ -443,7 +408,6 @@
         if (file) onFileSelected(file);
     });
 
-    // ========== КОНВЕРТАЦИЯ ==========
     async function convertFile() {
         if (!selectedFile) {
             showMessage('❌ Сначала выберите STL файл', true);
@@ -490,13 +454,11 @@
             currentBlob = blob;
             currentFileName = finalName;
 
-            // Показываем результат
             resultSizeSpan.textContent = formatSize(blob.size);
             resultNameSpan.textContent = finalName;
             resultArea.style.display = 'block';
             downloadLink.style.display = 'block';
 
-            // Создаём ссылку для скачивания
             const url = URL.createObjectURL(blob);
             downloadLink.href = url;
             downloadLink.download = finalName;
@@ -514,7 +476,6 @@
 
     convertBtn.addEventListener('click', convertFile);
 
-    // Очистка URL после скачивания (необязательно)
     downloadLink.addEventListener('click', () => {
         setTimeout(() => {
             if (currentBlob) URL.revokeObjectURL(downloadLink.href);
