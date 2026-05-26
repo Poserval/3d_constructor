@@ -337,25 +337,23 @@
 
     // ФИНАЛЬНАЯ ФУНКЦИЯ СОХРАНЕНИЯ — БЕЗ ОТОБРАЖЕНИЯ КОДОВ
     function saveFile() {
-        if (!currentBlob || !currentFileName) {
-            showMessage('❌ Нет файла для сохранения', true);
-            return;
-        }
-        if (window.AndroidSave && window.AndroidSave.saveFile) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                const base64 = reader.result.split(',')[1]; // Убираем data:...;base64,
-                window.AndroidSave.saveFile(base64, currentFileName);
-                showMessage('✅ Сохранение начато');
-            };
-            reader.onerror = function() {
-                showMessage('❌ Ошибка чтения файла', true);
-            };
-            reader.readAsDataURL(currentBlob);
-        } else {
-            showMessage('❌ Мост не найден', true);
-        }
+    if (!currentBlob || !currentFileName) {
+        showMessage('❌ Нет файла для сохранения', true);
+        return;
     }
+    
+    // Обычное скачивание через браузер (работает везде)
+    const url = URL.createObjectURL(currentBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = currentFileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showMessage('📥 Файл скачивается');
+}
 
     convertBtn.addEventListener('click', convertFile);
     downloadLink.addEventListener('click', saveFile);
