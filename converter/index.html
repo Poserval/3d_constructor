@@ -5,215 +5,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>3D Constructor — Конвертер STL</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: linear-gradient(145deg, #1a1a2e 0%, #2d1b4e 50%, #1a1a3e 100%);
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
         }
-
         .card {
             max-width: 550px;
             width: 100%;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255,255,255,0.1);
             backdrop-filter: blur(16px);
             border-radius: 2rem;
             padding: 0.8rem 1.5rem 2rem 1.5rem;
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255,255,255,0.2);
         }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 0.5rem;
-            margin-top: -5px;
-        }
-
-        .logo img {
-            max-width: 280px;
-            width: 100%;
-        }
-
-        .sub {
-            text-align: center;
-            color: #ccc;
-            font-size: 0.85rem;
-            margin-bottom: 2rem;
-            letter-spacing: 0.5px;
-        }
-
+        .logo { text-align: center; margin-bottom: 0.5rem; margin-top: -5px; }
+        .logo img { max-width: 280px; width: 100%; }
+        .sub { text-align: center; color: #ccc; font-size: 0.85rem; margin-bottom: 2rem; }
         .dropzone {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px dashed rgba(255, 255, 255, 0.4);
+            background: rgba(255,255,255,0.05);
+            border: 2px dashed rgba(255,255,255,0.4);
             border-radius: 1.5rem;
-            padding: 2rem 1rem;
+            padding: 2rem;
             text-align: center;
             cursor: pointer;
+            margin-bottom: 1.5rem;
             transition: 0.2s;
-            margin-bottom: 1.5rem;
         }
-
-        .dropzone:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #a07eff;
-        }
-
-        .dropzone .icon {
-            font-size: 3rem;
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-
-        .dropzone .title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: white;
-        }
-
-        .dropzone .hint {
-            font-size: 0.75rem;
-            color: #bbb;
-            margin-top: 6px;
-        }
-
+        .dropzone:hover { background: rgba(255,255,255,0.1); border-color: #a07eff; }
+        .dropzone .icon { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+        .dropzone .title { font-size: 1.2rem; font-weight: 600; color: white; }
+        .dropzone .hint { font-size: 0.75rem; color: #bbb; margin-top: 6px; }
         .file-card {
-            background: rgba(0, 0, 0, 0.45);
+            background: rgba(0,0,0,0.45);
             border-radius: 1.25rem;
-            padding: 0.75rem 1rem;
+            padding: 0.75rem;
             margin-bottom: 1.5rem;
             color: white;
-            font-size: 0.85rem;
             display: none;
             border-left: 4px solid #4caf50;
         }
-
-        .file-name {
-            font-weight: bold;
-            word-break: break-all;
-        }
-
-        .file-meta {
-            font-size: 0.7rem;
-            opacity: 0.7;
-            margin-top: 4px;
-        }
-
-        .format-label {
-            color: white;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-
+        .file-name { font-weight: bold; word-break: break-all; }
+        .file-meta { font-size: 0.7rem; opacity: 0.7; margin-top: 4px; }
         .format-row {
             display: flex;
             gap: 1rem;
             margin-bottom: 1.5rem;
             align-items: center;
-            flex-wrap: wrap;
         }
-
-        .format-box {
-            flex: 1;
-        }
-
         .format-select {
-            width: 100%;
+            flex: 1;
             padding: 0.7rem;
             border-radius: 1rem;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
             color: white;
-            font-weight: 500;
-            font-size: 1rem;
             cursor: pointer;
         }
-
-        .format-select option {
-            background: #1e1a2f;
-            color: white;
-        }
-
-        .arrow {
-            font-size: 1.8rem;
-            color: white;
-            font-weight: bold;
-        }
-
+        .format-select option { background: #1e1a2f; }
+        .arrow { font-size: 1.8rem; color: white; font-weight: bold; }
         .btn {
             width: 100%;
             padding: 0.9rem;
             border: none;
             border-radius: 3rem;
             font-weight: bold;
-            font-size: 1rem;
             cursor: pointer;
-            transition: 0.2s;
-            margin-bottom: 1rem;
-        }
-
-        .btn-primary {
             background: linear-gradient(95deg, #6a5acd, #4a2f8d);
             color: white;
-            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.05);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.5;
-            transform: none;
-            cursor: not-allowed;
-        }
-
-        .progress-area {
-            display: none;
             margin-bottom: 1rem;
         }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: #2e2a3e;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            width: 0%;
-            height: 100%;
-            background: #7c3aed;
-            transition: width 0.2s;
-        }
-
-        .progress-text {
-            color: white;
-            text-align: center;
-            font-size: 0.75rem;
-            margin-top: 6px;
-        }
-
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .progress-area { display: none; margin-bottom: 1rem; }
+        .progress-bar { width: 100%; height: 6px; background: #2e2a3e; border-radius: 4px; overflow: hidden; }
+        .progress-fill { width: 0%; height: 100%; background: #7c3aed; transition: width 0.2s; }
+        .progress-text { color: white; text-align: center; font-size: 0.75rem; margin-top: 6px; }
         .result-area {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0,0,0,0.4);
             border-radius: 1rem;
             padding: 0.8rem;
             margin-bottom: 1rem;
             display: none;
             color: white;
         }
-
         .download-link {
             display: block;
             text-align: center;
@@ -224,7 +103,6 @@
             color: white;
             font-weight: bold;
         }
-
         .toast {
             position: fixed;
             bottom: 20px;
@@ -235,22 +113,12 @@
             padding: 8px 20px;
             border-radius: 50px;
             color: white;
-            font-size: 0.85rem;
             transition: 0.2s;
             z-index: 999;
             pointer-events: none;
         }
-
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 1.8rem;
-            font-size: 0.7rem;
-            color: #aaa;
-        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        footer { text-align: center; margin-top: 1.8rem; font-size: 0.7rem; color: #aaa; }
     </style>
 </head>
 <body>
@@ -273,24 +141,19 @@
         <div class="file-meta" id="fileMeta">—</div>
     </div>
 
-    <div class="format-label">Формат конвертации</div>
     <div class="format-row">
-        <div class="format-box">
-            <select id="fromFormat" class="format-select" disabled>
-                <option value="stl">STL (исходный)</option>
-            </select>
-        </div>
+        <select id="toFormat" class="format-select">
+            <option value="obj">OBJ</option>
+            <option value="glb">GLB</option>
+            <option value="gltf">GLTF</option>
+        </select>
         <div class="arrow">→</div>
-        <div class="format-box">
-            <select id="toFormat" class="format-select">
-                <option value="obj">OBJ</option>
-                <option value="glb">GLB</option>
-                <option value="gltf">GLTF</option>
-            </select>
-        </div>
+        <select id="fromFormat" class="format-select" disabled>
+            <option value="stl">STL</option>
+        </select>
     </div>
 
-    <button id="convertBtn" class="btn btn-primary">🔄 Конвертировать</button>
+    <button id="convertBtn" class="btn">🔄 Конвертировать</button>
 
     <div id="progressArea" class="progress-area">
         <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
@@ -298,28 +161,16 @@
     </div>
 
     <div id="resultArea" class="result-area">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-            <span>📦 Размер:</span>
-            <span id="resultSize">—</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-            <span>📄 Название:</span>
-            <span id="resultName" style="word-break: break-all;">—</span>
-        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>📦 Размер:</span><span id="resultSize">—</span></div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;"><span>📄 Название:</span><span id="resultName">—</span></div>
         <a id="downloadLink" class="download-link" style="display: none;">⬇️ Скачать файл</a>
     </div>
-
-    <footer>Работает в браузере · STL → OBJ / GLB / GLTF</footer>
+    <footer>⚡ Локальная конвертация в браузере</footer>
 </div>
-
 <div id="toastMsg" class="toast"></div>
 
 <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
-        }
-    }
+    { "imports": { "three": "https://unpkg.com/three@0.128.0/build/three.module.js" } }
 </script>
 
 <script type="module">
@@ -329,7 +180,6 @@
     import { OBJExporter } from 'https://unpkg.com/three@0.128.0/examples/jsm/exporters/OBJExporter.js';
     import { GLTFExporter } from 'https://unpkg.com/three@0.128.0/examples/jsm/exporters/GLTFExporter.js';
 
-    // DOM элементы
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileInput');
     const fileInfoDiv = document.getElementById('fileInfo');
@@ -377,10 +227,9 @@
     }
 
     function showFileInfo(file) {
-        const ext = file.name.split('.').pop().toLowerCase();
         const sizeStr = formatSize(file.size);
         fileNameSpan.textContent = file.name;
-        fileMetaSpan.textContent = `${ext.toUpperCase()} · ${sizeStr}`;
+        fileMetaSpan.textContent = `STL · ${sizeStr}`;
         fileInfoDiv.style.display = 'block';
         selectedFile = file;
     }
@@ -389,7 +238,7 @@
         if (!file) return;
         const ext = file.name.split('.').pop().toLowerCase();
         if (ext !== 'stl') {
-            showMessage('❌ Сейчас поддерживаются только STL файлы', true);
+            showMessage('❌ Поддерживаются только STL файлы', true);
             return;
         }
         if (file.size > 200 * 1024 * 1024) {
@@ -404,7 +253,6 @@
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length) onFileSelected(e.target.files[0]);
     });
-
     dropzone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropzone.style.borderColor = '#a07eff';
@@ -427,70 +275,55 @@
             showMessage('❌ Сначала выберите STL файл', true);
             return;
         }
-
         const targetFormat = toFormatSelect.value;
         if (!targetFormat) {
             showMessage('❌ Выберите целевой формат', true);
             return;
         }
-
         convertBtn.disabled = true;
         progressArea.style.display = 'block';
         resultArea.style.display = 'none';
         downloadLink.style.display = 'none';
         updateProgress(10, 'Чтение файла...');
-
         try {
             const arrayBuffer = await selectedFile.arrayBuffer();
             updateProgress(30, 'Загрузка геометрии...');
-            
             const loader = new STLLoader();
             const geometry = loader.parse(arrayBuffer);
-            
             const material = new THREE.MeshStandardMaterial({ color: 0x66ccff });
             const mesh = new THREE.Mesh(geometry, material);
             const scene = new THREE.Scene();
             scene.add(mesh);
             scene.add(new THREE.AmbientLight(0xffffff));
-            
             updateProgress(60, 'Конвертация в ' + targetFormat.toUpperCase() + '...');
-            
             let blob;
             let extension = targetFormat;
-            
             if (targetFormat === 'stl') {
                 const exporter = new STLExporter();
                 const data = exporter.parse(scene, { binary: false });
                 blob = new Blob([data], { type: 'text/plain' });
-            } 
-            else if (targetFormat === 'obj') {
+            } else if (targetFormat === 'obj') {
                 const exporter = new OBJExporter();
                 const data = exporter.parse(scene);
                 blob = new Blob([data], { type: 'text/plain' });
-            } 
-            else if (targetFormat === 'glb' || targetFormat === 'gltf') {
+            } else if (targetFormat === 'glb' || targetFormat === 'gltf') {
                 const exporter = new GLTFExporter();
                 const data = await new Promise((resolve, reject) => {
                     exporter.parse(scene, resolve, reject, { binary: targetFormat === 'glb' });
                 });
                 blob = new Blob([data], { type: targetFormat === 'glb' ? 'application/octet-stream' : 'application/json' });
-            } 
-            else {
+            } else {
                 throw new Error('Формат не поддерживается');
             }
-            
             updateProgress(100, 'Готово!');
-            
             const originalName = selectedFile.name.replace(/\.stl$/i, '');
             const finalName = `${originalName}_converted.${extension}`;
             currentBlob = blob;
             currentFileName = finalName;
-            
             resultSizeSpan.textContent = formatSize(blob.size);
             resultNameSpan.textContent = finalName;
             resultArea.style.display = 'block';
             downloadLink.style.display = 'block';
-            
             showMessage('✅ Конвертация завершена!');
         } catch (err) {
             console.error(err);
@@ -502,33 +335,32 @@
         }
     }
 
-    // СОХРАНЕНИЕ — открываем файл в браузере (там будет меню)
-   function saveFile() {
-    if (!currentBlob || !currentFileName) {
-        showMessage('❌ Нет файла для сохранения', true);
-        return;
+    // ФИНАЛЬНАЯ ФУНКЦИЯ СОХРАНЕНИЯ — БЕЗ ОТОБРАЖЕНИЯ КОДОВ
+    function saveFile() {
+        if (!currentBlob || !currentFileName) {
+            showMessage('❌ Нет файла для сохранения', true);
+            return;
+        }
+        if (window.AndroidSave && window.AndroidSave.saveFile) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const base64 = reader.result.split(',')[1]; // Убираем data:...;base64,
+                window.AndroidSave.saveFile(base64, currentFileName);
+                showMessage('✅ Сохранение начато');
+            };
+            reader.onerror = function() {
+                showMessage('❌ Ошибка чтения файла', true);
+            };
+            reader.readAsDataURL(currentBlob);
+        } else {
+            showMessage('❌ Мост не найден', true);
+        }
     }
 
-    // Передаём файл в Android через мост
-    if (window.AndroidSave && window.AndroidSave.saveFile) {
-        const reader = new FileReader();
-        reader.onload = function() {
-            const base64 = reader.result;
-            window.AndroidSave.saveFile(base64, currentFileName);
-            showMessage('📥 Сохранение...');
-        };
-        reader.onerror = function() {
-            showMessage('❌ Ошибка чтения файла', true);
-        };
-        reader.readAsDataURL(currentBlob);
-    } else {
-        showMessage('❌ Мост не найден', true);
-    }
-}
     convertBtn.addEventListener('click', convertFile);
     downloadLink.addEventListener('click', saveFile);
 
-    console.log('✅ Конвертер STL готов (локальная конвертация)');
+    console.log('✅ Конвертер готов');
 </script>
 </body>
 </html>
