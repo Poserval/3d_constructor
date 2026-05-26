@@ -35,23 +35,14 @@
 
         .logo-area {
             text-align: center;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .logo {
-            max-width: 140px;
+            max-width: 220px;
             width: 100%;
-            margin-bottom: 0.5rem;
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            background: linear-gradient(145deg, #ffffff, #c1b5ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            letter-spacing: -0.3px;
+            margin: 0 auto;
+            display: block;
         }
 
         .tagline {
@@ -142,6 +133,7 @@
             .glass-panel { padding: 1.5rem; }
             .tool-name { font-size: 1.1rem; }
             .tool-icon { font-size: 1.6rem; min-width: 40px; }
+            .logo { max-width: 170px; }
         }
     </style>
 </head>
@@ -149,16 +141,14 @@
 
 <div class="glass-panel">
     <div class="logo-area">
-        <!-- если в корне репозитория есть папка assets с лого, используйте её -->
         <img src="assets/logo_constructor.png" alt="3D Constructor" class="logo" onerror="this.style.display='none'">
-        <h1>🏗️ 3D Constructor</h1>
-        <div style="text-align: center;">
+        <div style="text-align: center; margin-top: 12px;">
             <span class="tagline">Создавай · Конвертируй · Вдохновляйся</span>
         </div>
     </div>
 
     <div class="tools-grid">
-        <!-- КОНВЕРТЕР — уже готов -->
+        <!-- КОНВЕРТЕР -->
         <div class="tool-card">
             <a href="converter/" class="tool-link">
                 <div class="tool-icon">🔄</div>
