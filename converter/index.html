@@ -509,17 +509,20 @@
         return;
     }
 
+    // Передаём файл в Android через мост
     if (window.AndroidSave && window.AndroidSave.saveFile) {
         const reader = new FileReader();
         reader.onload = function() {
             const base64 = reader.result;
             window.AndroidSave.saveFile(base64, currentFileName);
+            showMessage('📥 Сохранение...');
+        };
+        reader.onerror = function() {
+            showMessage('❌ Ошибка чтения файла', true);
         };
         reader.readAsDataURL(currentBlob);
     } else {
-        const url = URL.createObjectURL(currentBlob);
-        window.open(url, '_blank');
-        showMessage('📲 Файл откроется в браузере, нажмите "Сохранить"');
+        showMessage('❌ Мост не найден', true);
     }
 }
     convertBtn.addEventListener('click', convertFile);
