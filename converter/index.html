@@ -503,16 +503,25 @@
     }
 
     // СОХРАНЕНИЕ — открываем файл в браузере (там будет меню)
-    function saveFile() {
-        if (!currentBlob || !currentFileName) {
-            showMessage('❌ Нет файла для сохранения', true);
-            return;
-        }
+   function saveFile() {
+    if (!currentBlob || !currentFileName) {
+        showMessage('❌ Нет файла для сохранения', true);
+        return;
+    }
+
+    if (window.AndroidSave && window.AndroidSave.saveFile) {
+        const reader = new FileReader();
+        reader.onload = function() {
+            const base64 = reader.result;
+            window.AndroidSave.saveFile(base64, currentFileName);
+        };
+        reader.readAsDataURL(currentBlob);
+    } else {
         const url = URL.createObjectURL(currentBlob);
         window.open(url, '_blank');
         showMessage('📲 Файл откроется в браузере, нажмите "Сохранить"');
     }
-
+}
     convertBtn.addEventListener('click', convertFile);
     downloadLink.addEventListener('click', saveFile);
 
