@@ -362,5 +362,29 @@
     
     console.log('✅ Конвертер STL → OBJ/GLB/GLTF готов (локальный)');
 </script>
+
+    <script>
+    // Перехватываем скачивание и передаём в Android
+    const originalDownloadLink = document.getElementById('downloadLink');
+    if (originalDownloadLink) {
+        originalDownloadLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (window.currentBlob && window.currentFileName) {
+                if (window.AndroidSave && window.AndroidSave.saveFile) {
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        const base64 = reader.result.split(',')[1];
+                        window.AndroidSave.saveFile(base64, window.currentFileName);
+                    };
+                    reader.readAsDataURL(window.currentBlob);
+                } else {
+                    // Если моста нет — открываем в браузере
+                    const url = URL.createObjectURL(window.currentBlob);
+                    window.open(url, '_blank');
+                }
+            }
+        });
+    }
+</script>
 </body>
 </html>
