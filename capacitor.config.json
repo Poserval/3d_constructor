@@ -2,11 +2,13 @@
   "appId": "com.constructor3d.app",
   "appName": "3D Constructor", 
   "webDir": "capacitor-web",
-  "android": {
-    "icon": "./assets/logo_constructor.png"
-  },
   "server": {
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "allowNavigation": ["*"]
+  },
+  "android": {
+    "allowMixedContent": true,
+    "webContentsDebuggingEnabled": true
   },
   "plugins": {
     "SplashScreen": {
