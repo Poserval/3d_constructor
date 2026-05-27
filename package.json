@@ -2,7 +2,7 @@
   "name": "3d-constructor",
   "version": "1.0.0",
   "scripts": {
-    "build": "mkdir -p capacitor-web && cp *.html *.json *.js *.css capacitor-web/ && cp -r assets converter capacitor-web/",
+    "build": "mkdir -p capacitor-web && cp *.html *.json *.js capacitor-web/ 2>/dev/null || true && cp -r assets converter capacitor-web/",
     "clean": "rm -rf capacitor-web android",
     "cap:add": "npm run build && npx cap add android && npm run clean",
     "cap:sync": "npm run build && npx cap sync android && npm run clean"
