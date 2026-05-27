@@ -13,6 +13,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Clear npm cache
+      run: |
+        rm -rf node_modules
+        rm -f package-lock.json
+        npm cache clean --force
+      
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -21,8 +27,8 @@ jobs:
     - name: Install dependencies
       run: |
         npm init -y
-        npm install @capacitor/android@^5.0.0 @capacitor/core@^5.0.0 @capacitor/filesystem@^5.0.0 @capacitor/network@^5.0.0
-        npm install --save-dev @capacitor/cli@^5.0.0 @capacitor/app@^5.0.8 @capacitor/splash-screen@^5.0.8
+        npm install @capacitor/android@^5.0.0 @capacitor/core@^5.0.0 @capacitor/filesystem@^5.0.0
+        npm install --save-dev @capacitor/cli@^5.0.0
       
     - name: Build web assets
       run: npm run build
@@ -30,18 +36,14 @@ jobs:
     - name: Generate Android project
       run: npx cap add android && npx cap sync android
       
-    - name: Replace ALL possible icons
+    - name: Replace icons
       run: |
-        echo "🔄 Заменяем ВСЕ возможные иконки..."
         find android -name "*.png" -type f | while read file; do
-          echo "Заменяем: $file"
           cp ./assets/logo_constructor.png "$file" 2>/dev/null || true
         done
-        echo "✅ Все иконки заменены!"
       
     - name: Create signing config
       run: |
-        echo "🔐 Создаем ключ и конфиг подписи..."
         cd android/app
         keytool -genkeypair -v \
           -keystore release.keystore \
@@ -72,7 +74,7 @@ jobs:
         EOF
         
         echo "apply from: 'signing-config.gradle'" >> build.gradle
-        echo "✅ Конфиг подписи создан!"
+        cd ../..
       
     - name: Setup Java
       uses: actions/setup-java@v4
