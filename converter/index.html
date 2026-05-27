@@ -102,6 +102,7 @@
             border-radius: 3rem;
             color: white;
             font-weight: bold;
+            cursor: pointer;
         }
         .toast {
             position: fixed;
@@ -169,17 +170,14 @@
 </div>
 <div id="toastMsg" class="toast"></div>
 
-<script type="importmap">
-    { "imports": { "three": "https://unpkg.com/three@0.128.0/build/three.module.js" } }
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/STLExporter.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/OBJExporter.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js"></script>
 
-<script type="module">
-    import * as THREE from 'three';
-    import { STLLoader } from 'https://unpkg.com/three@0.128.0/examples/jsm/loaders/STLLoader.js';
-    import { STLExporter } from 'https://unpkg.com/three@0.128.0/examples/jsm/exporters/STLExporter.js';
-    import { OBJExporter } from 'https://unpkg.com/three@0.128.0/examples/jsm/exporters/OBJExporter.js';
-    import { GLTFExporter } from 'https://unpkg.com/three@0.128.0/examples/jsm/exporters/GLTFExporter.js';
-
+<script>
+    // DOM элементы
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileInput');
     const fileInfoDiv = document.getElementById('fileInfo');
@@ -253,6 +251,7 @@
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length) onFileSelected(e.target.files[0]);
     });
+
     dropzone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropzone.style.borderColor = '#a07eff';
@@ -288,38 +287,49 @@
         try {
             const arrayBuffer = await selectedFile.arrayBuffer();
             updateProgress(30, 'Загрузка геометрии...');
-            const loader = new STLLoader();
+            
+            const loader = new THREE.STLLoader();
             const geometry = loader.parse(arrayBuffer);
+            
             const material = new THREE.MeshStandardMaterial({ color: 0x66ccff });
             const mesh = new THREE.Mesh(geometry, material);
             const scene = new THREE.Scene();
             scene.add(mesh);
             scene.add(new THREE.AmbientLight(0xffffff));
+            
             updateProgress(60, 'Конвертация в ' + targetFormat.toUpperCase() + '...');
+            
             let blob;
             let extension = targetFormat;
+            
             if (targetFormat === 'stl') {
-                const exporter = new STLExporter();
+                const exporter = new THREE.STLExporter();
                 const data = exporter.parse(scene, { binary: false });
                 blob = new Blob([data], { type: 'text/plain' });
-            } else if (targetFormat === 'obj') {
-                const exporter = new OBJExporter();
+            } 
+            else if (targetFormat === 'obj') {
+                const exporter = new THREE.OBJExporter();
                 const data = exporter.parse(scene);
                 blob = new Blob([data], { type: 'text/plain' });
-            } else if (targetFormat === 'glb' || targetFormat === 'gltf') {
-                const exporter = new GLTFExporter();
+            } 
+            else if (targetFormat === 'glb' || targetFormat === 'gltf') {
+                const exporter = new THREE.GLTFExporter();
                 const data = await new Promise((resolve, reject) => {
                     exporter.parse(scene, resolve, reject, { binary: targetFormat === 'glb' });
                 });
                 blob = new Blob([data], { type: targetFormat === 'glb' ? 'application/octet-stream' : 'application/json' });
-            } else {
+            } 
+            else {
                 throw new Error('Формат не поддерживается');
             }
+            
             updateProgress(100, 'Готово!');
+            
             const originalName = selectedFile.name.replace(/\.stl$/i, '');
             const finalName = `${originalName}_converted.${extension}`;
             currentBlob = blob;
             currentFileName = finalName;
+            
             resultSizeSpan.textContent = formatSize(blob.size);
             resultNameSpan.textContent = finalName;
             resultArea.style.display = 'block';
@@ -335,84 +345,49 @@
         }
     }
 
-   // === ПОЛНОСТЬЮ РАБОЧАЯ ФУНКЦИЯ СОХРАНЕНИЯ ===
-async function saveFile() {
-    if (!currentBlob || !currentFileName) {
-        showMessage('❌ Нет файла для сохранения', true);
-        return;
-    }
-
-    // Если мы не в нативной среде (браузер) — используем старый метод
-    if (!window.Capacitor || !window.Capacitor.isNativePlatform) {
+    // СОХРАНЕНИЕ — для Capacitor
+    async function saveFile() {
+        if (!currentBlob || !currentFileName) {
+            showMessage('❌ Нет файла для сохранения', true);
+            return;
+        }
+        
+        // Если в Capacitor
+        if (window.Capacitor && window.Capacitor.isNativePlatform) {
+            try {
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    const base64 = reader.result.split(',')[1];
+                    const { Filesystem, Directory } = window.Capacitor.Plugins;
+                    await Filesystem.writeFile({
+                        path: currentFileName,
+                        data: base64,
+                        directory: Directory.Documents,
+                        recursive: true
+                    });
+                    showMessage('✅ Файл сохранён в Documents');
+                };
+                reader.readAsDataURL(currentBlob);
+            } catch (err) {
+                showMessage('❌ Ошибка: ' + err.message, true);
+            }
+            return;
+        }
+        
+        // Обычный браузер
         const url = URL.createObjectURL(currentBlob);
         const a = document.createElement('a');
         a.href = url;
         a.download = currentFileName;
-        document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
         URL.revokeObjectURL(url);
         showMessage('📥 Файл скачивается');
-        return;
     }
 
-    // --- НАТИВНЫЙ МЕТОД ДЛЯ ANDROID ---
-    showMessage('📥 Подготовка к сохранению...');
+    convertBtn.addEventListener('click', convertFile);
+    downloadLink.addEventListener('click', saveFile);
 
-    try {
-        // 1. Читаем Blob как Base64
-        const base64 = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(currentBlob);
-        });
-
-        // 2. Получаем доступ к плагинам Capacitor
-        const { Filesystem, Directory } = Capacitor.Plugins;
-        
-        // 3. Сохраняем файл в Documents (единственное доступное место)
-        const result = await Filesystem.writeFile({
-            path: currentFileName,
-            data: base64,
-            directory: Directory.Documents,
-            recursive: true
-        });
-        
-        console.log('File saved:', result.uri);
-        
-        // 4. Получаем URI и открываем файл через системный просмотрщик
-        const fileUri = result.uri;
-        const mimeType = getMimeType(currentFileName);
-        
-        // Используем Share API, чтобы показать системное меню "Сохранить"
-        const { Share } = Capacitor.Plugins;
-        await Share.share({
-            title: 'Сохранить файл',
-            text: 'Нажмите "Сохранить", чтобы сохранить файл на устройство',
-            url: fileUri,
-            dialogTitle: 'Сохранить 3D модель'
-        });
-        
-        showMessage('✅ Файл готов к сохранению');
-        
-    } catch (error) {
-        console.error('Save error:', error);
-        showMessage(`❌ Ошибка: ${error.message}`, true);
-    }
-}
-
-// Вспомогательная функция для определения MIME-типа
-function getMimeType(fileName) {
-    const ext = fileName.split('.').pop().toLowerCase();
-    const types = {
-        'stl': 'application/sla',
-        'obj': 'text/plain',
-        'glb': 'model/gltf-binary',
-        'gltf': 'model/gltf+json'
-    };
-    return types[ext] || 'application/octet-stream';
-}
+    console.log('✅ Конвертер готов');
 </script>
 </body>
 </html>
