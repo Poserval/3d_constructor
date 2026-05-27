@@ -1,0 +1,14 @@
+{
+  "appId": "com.constructor3d.app",
+  "appName": "3D Constructor",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  }
+}
