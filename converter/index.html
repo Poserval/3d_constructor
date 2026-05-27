@@ -335,12 +335,15 @@
         }
     }
 
-    // СОХРАНЕНИЕ БЕЗ МОСТА — ОБЫЧНОЕ СКАЧИВАНИЕ ЧЕРЕЗ БРАУЗЕР
-    function saveFile() {
-        if (!currentBlob || !currentFileName) {
-            showMessage('❌ Нет файла для сохранения', true);
-            return;
-        }
+   // === ПОЛНОСТЬЮ РАБОЧАЯ ФУНКЦИЯ СОХРАНЕНИЯ ===
+async function saveFile() {
+    if (!currentBlob || !currentFileName) {
+        showMessage('❌ Нет файла для сохранения', true);
+        return;
+    }
+
+    // Если мы не в нативной среде (браузер) — используем старый метод
+    if (!window.Capacitor || !window.Capacitor.isNativePlatform) {
         const url = URL.createObjectURL(currentBlob);
         const a = document.createElement('a');
         a.href = url;
@@ -350,12 +353,66 @@
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         showMessage('📥 Файл скачивается');
+        return;
     }
 
-    convertBtn.addEventListener('click', convertFile);
-    downloadLink.addEventListener('click', saveFile);
+    // --- НАТИВНЫЙ МЕТОД ДЛЯ ANDROID ---
+    showMessage('📥 Подготовка к сохранению...');
 
-    console.log('✅ Конвертер готов');
+    try {
+        // 1. Читаем Blob как Base64
+        const base64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(currentBlob);
+        });
+
+        // 2. Получаем доступ к плагинам Capacitor
+        const { Filesystem, Directory } = Capacitor.Plugins;
+        
+        // 3. Сохраняем файл в Documents (единственное доступное место)
+        const result = await Filesystem.writeFile({
+            path: currentFileName,
+            data: base64,
+            directory: Directory.Documents,
+            recursive: true
+        });
+        
+        console.log('File saved:', result.uri);
+        
+        // 4. Получаем URI и открываем файл через системный просмотрщик
+        const fileUri = result.uri;
+        const mimeType = getMimeType(currentFileName);
+        
+        // Используем Share API, чтобы показать системное меню "Сохранить"
+        const { Share } = Capacitor.Plugins;
+        await Share.share({
+            title: 'Сохранить файл',
+            text: 'Нажмите "Сохранить", чтобы сохранить файл на устройство',
+            url: fileUri,
+            dialogTitle: 'Сохранить 3D модель'
+        });
+        
+        showMessage('✅ Файл готов к сохранению');
+        
+    } catch (error) {
+        console.error('Save error:', error);
+        showMessage(`❌ Ошибка: ${error.message}`, true);
+    }
+}
+
+// Вспомогательная функция для определения MIME-типа
+function getMimeType(fileName) {
+    const ext = fileName.split('.').pop().toLowerCase();
+    const types = {
+        'stl': 'application/sla',
+        'obj': 'text/plain',
+        'glb': 'model/gltf-binary',
+        'gltf': 'model/gltf+json'
+    };
+    return types[ext] || 'application/octet-stream';
+}
 </script>
 </body>
 </html>
