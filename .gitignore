@@ -1,0 +1,8 @@
+node_modules/
+.android/
+*.iml
+*.class
+*.apk
+*.aab
+local.properties
+.DS_Store
