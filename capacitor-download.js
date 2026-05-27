@@ -12,18 +12,28 @@
                     const base64 = reader.result.split(',')[1];
                     
                     // Сохраняем файл в кэш приложения
-                    const result = await Filesystem.writeFile({
+                    await Filesystem.writeFile({
                         path: fileName,
                         data: base64,
                         directory: Directory.Cache,
                         recursive: true
                     });
                     
-                    console.log('File saved to cache:', result.uri);
+                    // Получаем URI файла
+                    const uriResult = await Filesystem.getUri({
+                        path: fileName,
+                        directory: Directory.Cache
+                    });
                     
-                    // Создаём временную ссылку и открываем в браузере
-                    // Это вызовет системный диалог сохранения
-                    window.open(result.uri, '_blank');
+                    console.log('File URI:', uriResult.uri);
+                    
+                    // Открываем файл через Intent (стандартный Capacitor)
+                    const { App } = window.Capacitor.Plugins;
+                    
+                    // Используем App.openURL для открытия файла
+                    await App.openURL({
+                        url: uriResult.uri
+                    });
                     
                     alert('✅ Файл готов к сохранению');
                 };
@@ -34,17 +44,5 @@
                 alert('❌ Ошибка: ' + error.message);
             }
         };
-        
-        function getMimeType(fileName) {
-            const ext = fileName.split('.').pop().toLowerCase();
-            const mimeTypes = {
-                'stl': 'application/sla',
-                'obj': 'text/plain',
-                'glb': 'model/gltf-binary',
-                'gltf': 'model/gltf+json',
-                'txt': 'text/plain'
-            };
-            return mimeTypes[ext] || 'application/octet-stream';
-        }
     }
 })();
